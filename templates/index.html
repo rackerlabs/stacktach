@@ -16,7 +16,7 @@ function search_form(deployment_id)
     var field = $("#field").val();
     var value = $("#query").val();
     var data = {'field':field, 'value':value};
-    $("#detail").load('{% url stacktach.views.search 0 %}'.replace(0, deployment_id));
+    $("#detail").load('{% url stacktach.views.search 0 %}'.replace(0, deployment_id), data);
     return false;
 };
 
