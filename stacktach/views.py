@@ -24,19 +24,26 @@ def _extract_states(payload):
 def _monitor_message(routing_key, body):
     event = body['event_type']
     publisher = body['publisher_id']
-    request_id = body['_context_request_id']
     parts = publisher.split('.')
     service = parts[0]
     if len(parts) > 1:
         host = ".".join(parts[1:])
     else:
         host = None
+    if '_context_request_id' in body:
+        request_id = body['_context_request_id']
+    elif 'message_id' in body:
+        request_id = body['message_id']
+        service = 'image'
+        host = publisher
     payload = body['payload']
     request_spec = payload.get('request_spec', None)
 
     # instance UUID's seem to hide in a lot of odd places.
     instance = payload.get('instance_id', None)
     instance = payload.get('instance_uuid', instance)
+    if 'properties' in payload:
+        instance = payload['properties'].get('instance_uuid', instance)
     if not instance:
         instance = payload.get('exception', {}).get('kwargs', {}).get('uuid')
     if not instance:
@@ -44,6 +51,7 @@ def _monitor_message(routing_key, body):
 
     tenant = body.get('_context_project_id', None)
     tenant = payload.get('tenant_id', tenant)
+    tenant = payload.get('owner', tenant)
     resp = dict(host=host, instance=instance, publisher=publisher,
                 service=service, event=event, tenant=tenant,
                 request_id=request_id)
@@ -330,12 +338,15 @@ def search(request, deployment_id):
     column = request.POST.get('field', None)
     value = request.POST.get('value', None)
     rows = None
+    print "Column: %s" % column
+    print "Value: %s" % value
     if column != None and value != None:
         rows = models.RawData.objects.select_related()
         if deployment_id:
             row = rows.filter(deployment=deployment_id)
-        rows = rows.filter(**{column:value}). \
-               order_by('-when')[:22]
+        #rows = rows.filter(**{column:value}). \
+        #       order_by('-when')[:22]
+        rows = rows.filter(**{column:value}).order_by('-when')
         _post_process_raw_data(rows)
     c['rows'] = rows
     c['allow_expansion'] = True
