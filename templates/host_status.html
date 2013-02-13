@@ -1,8 +1,9 @@
 {% include "rows.html" %}
 
+
 <script type="text/javascript">
   $(document).oneTime(2000, function() {
-    $('#host_activity').load('/{{deployment_id}}/latest_raw'); 
+      $('#host_activity').load('{% url stacktach.views.latest_raw deployment_id %}'); 
   });
 </script>
 

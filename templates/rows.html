@@ -22,7 +22,7 @@
     </td>
 
     <td>
-        <a href='/{{row.deployment.id}}'>{{row.deployment.name}}</a>
+      <a href='{% url stacktach.views.home row.deployment.id %}'>{{row.deployment.name}}</a>
     </td>
 
     <td class='cell-border'>

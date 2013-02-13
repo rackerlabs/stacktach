@@ -3,14 +3,12 @@
 {% block extra_js %}
 function details(deployment_id, column, row_id)
 {
-    $("#detail").load('/' + deployment_id + '/details/' + column + 
-                      '/' + row_id);
+    $("#detail").load('{% url stacktach.views.details 0 1 2 %}'.replace(0, deployment_id).replace(1, column).replace(2, row_id));
 };
 
 function expand(deployment_id, row_id)
 {
-    $("#row_expansion_" + row_id).load('/' + deployment_id + '/expand/' + 
-                                       row_id);
+    $("#row_expansion_" + row_id).load('{% url stacktach.views.expand 0 1 %}'.replace(0, deployment_id).replace(1, row_id));
 };
 
 function search_form(deployment_id)
@@ -18,7 +16,7 @@ function search_form(deployment_id)
     var field = $("#field").val();
     var value = $("#query").val();
     var data = {'field':field, 'value':value};
-    $("#detail").load('/' + deployment_id + '/search/', data);
+    $("#detail").load('{% url stacktach.views.search 0 %}'.replace(0, deployment_id));
     return false;
 };
 
