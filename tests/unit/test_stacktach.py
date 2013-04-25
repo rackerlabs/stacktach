@@ -193,8 +193,10 @@ class StacktachRawParsingTestCase(unittest.TestCase):
         views.aggregate_lifecycle(raw)
         self.mox.StubOutWithMock(views, "aggregate_usage")
         views.aggregate_usage(raw, dict)
+        ack_func = self.mox.CreateMockAnything()
+        ack_func.__call__()
         self.mox.ReplayAll()
-        views.process_raw_data(deployment, args, json_args)
+        views.process_raw_data(deployment, args, json_args, ack_func)
         self.mox.VerifyAll()
         views.HANDLERS['monitor.info'] = old_info_handler
 
@@ -222,8 +224,10 @@ class StacktachRawParsingTestCase(unittest.TestCase):
         views.aggregate_lifecycle(raw)
         self.mox.StubOutWithMock(views, "aggregate_usage")
         views.aggregate_usage(raw, dict)
+        ack_func = self.mox.CreateMockAnything()
+        ack_func.__call__()
         self.mox.ReplayAll()
-        views.process_raw_data(deployment, args, json_args)
+        views.process_raw_data(deployment, args, json_args, ack_func)
         self.mox.VerifyAll()
         views.HANDLERS['monitor.info'] = old_info_handler
 

@@ -342,7 +342,7 @@ def aggregate_usage(raw, body):
         USAGE_PROCESS_MAPPING[raw.event](raw, body)
 
 
-def process_raw_data(deployment, args, json_args):
+def process_raw_data(deployment, args, json_args, ack_func):
     """This is called directly by the worker to add the event to the db."""
     db.reset_queries()
 
@@ -364,6 +364,7 @@ def process_raw_data(deployment, args, json_args):
         values['json'] = json_args
         record = STACKDB.create_rawdata(**values)
         STACKDB.save(record)
+        ack_func()
 
         aggregate_lifecycle(record)
         aggregate_usage(record, body)
