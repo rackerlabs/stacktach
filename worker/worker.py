@@ -44,6 +44,7 @@ handler = logging.handlers.TimedRotatingFileHandler('worker.log',
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 LOG.addHandler(handler)
+LOG.handlers[0].doRollover()
 
 
 class NovaConsumer(kombu.mixins.ConsumerMixin):
@@ -89,6 +90,7 @@ class NovaConsumer(kombu.mixins.ConsumerMixin):
         raw = views.process_raw_data(self.deployment, args, asJson)
         if raw:
             self.processed += 1
+            message.ack()
 
         self._check_memory()
 
@@ -125,7 +127,6 @@ class NovaConsumer(kombu.mixins.ConsumerMixin):
             self._process(message)
         except Exception, e:
             LOG.exception("Problem %s" % e)
-        message.ack()
 
 
 def continue_running():
@@ -164,11 +165,13 @@ def run(deployment_config):
                                             queue_arguments)
                     consumer.run()
                 except Exception as e:
+                    LOG.error("!!!!Exception!!!!")
                     LOG.exception("name=%s, exception=%s. Reconnecting in 5s" %
                                     (name, e))
                     time.sleep(5)
             LOG.debug("Completed processing on '%s'" % name)
         except:
+            LOG.error("!!!!Exception!!!!")
             e = sys.exc_info()[0]
             msg = "Uncaught exception: deployment=%s, exception=%s. Retrying in 5s"
             LOG.exception(msg % (name, e))

@@ -29,7 +29,7 @@ def get_host_names():
 def routing_key_type(key):
     if key.endswith('error'):
         return 'E'
-    return  ' '
+    return ' '
 
 
 def get_deployments():
@@ -71,14 +71,13 @@ def sec_to_time(diff):
     return "%dd %02d:%02d:%02d%s" % (days, hours, minutes, seconds, usec)
 
 
-def rsp(data, status=200):
-    return HttpResponse(json.dumps(data), content_type="application/json",
-                        status=status)
+def rsp(data, status=200, content_type="application/json"):
+    return HttpResponse(data, content_type=content_type, status=status)
 
 
 def error_response(status, type, message):
     results = [["Error", "Message"], [type, message]]
-    return rsp(results, status)
+    return rsp(json.dumps(results), status)
 
 
 def do_deployments(request):
@@ -86,7 +85,7 @@ def do_deployments(request):
     results = [["#", "Name"]]
     for deployment in deployments:
         results.append([deployment.id, deployment.name])
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_events(request):
@@ -94,7 +93,7 @@ def do_events(request):
     results = [["Event Name"]]
     for event in events:
         results.append([event['event']])
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_hosts(request):
@@ -102,7 +101,7 @@ def do_hosts(request):
     results = [["Host Name"]]
     for host in hosts:
         results.append([host['host']])
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_uuid(request):
@@ -120,7 +119,7 @@ def do_uuid(request):
         results.append([e.id, routing_key_type(e.routing_key), str(when),
                         e.deployment.name, e.event, e.host, e.state,
                         e.old_state, e.old_task])
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_timings_uuid(request):
@@ -128,20 +127,27 @@ def do_timings_uuid(request):
     if not utils.is_uuid_like(uuid):
         msg = "%s is not uuid-like" % uuid
         return error_response(400, 'Bad Request', msg)
-
-    return rsp(get_timings_for_uuid(uuid))
+    results = get_timings_for_uuid(uuid)
+    return rsp(json.dumps(results))
 
 
 def do_timings(request):
     name = request.GET['name']
     results = [[name, "Time"]]
-    timings = models.Timing.objects.select_related().filter(name=name)\
-                           .exclude(Q(start_raw=None) | Q(end_raw=None))\
-                           .order_by('diff')
+    timings_query = models.Timing.objects.select_related()\
+                                 .filter(name=name)\
+                                 .exclude(Q(start_raw=None) | Q(end_raw=None))
+    if request.GET.get('end_when_min') is not None:
+        min_when = decimal.Decimal(request.GET['end_when_min'])
+        timings_query = timings_query.filter(end_when__gte=min_when)
+    if request.GET.get('end_when_max') is not None:
+        max_when = decimal.Decimal(request.GET['end_when_max'])
+        timings_query = timings_query.filter(end_when__lte=max_when)
+    timings = timings_query.order_by('diff')
 
     for t in timings:
         results.append([t.lifecycle.instance, sec_to_time(t.diff)])
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_summary(request):
@@ -175,7 +181,7 @@ def do_summary(request):
 
         results.append([name, int(num), sec_to_time(_min),
                         sec_to_time(_max), sec_to_time(int(total / num))])
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_request(request):
@@ -193,7 +199,7 @@ def do_request(request):
         results.append([e.id, routing_key_type(e.routing_key), str(when),
                         e.deployment.name, e.event, e.host, e.state,
                         e.old_state, e.old_task])
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_show(request, event_id):
@@ -224,7 +230,7 @@ def do_show(request, event_id):
     final.append(json.dumps(j, indent=2))
     final.append(event.instance)
 
-    return rsp(final)
+    return rsp(json.dumps(final))
 
 
 def do_watch(request, deployment_id):
@@ -280,8 +286,9 @@ def do_watch(request, deployment_id):
                        deployment_map[raw.deployment.id].name,
                        raw.event,
                        uuid])
+    results_json = json.dumps([c, results, str(dec_now)])
 
-    return rsp([c, results, str(dec_now)])
+    return rsp(results_json)
 
 
 def do_kpi(request, tenant_id=None):
@@ -305,7 +312,7 @@ def do_kpi(request, tenant_id=None):
         if tenant_id is None or (tenant_id == end_event.tenant):
             results.append([event, sec_to_time(track.duration),
                             uuid, end_event.deployment.name])
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_list_usage_launches(request):
@@ -331,7 +338,7 @@ def do_list_usage_launches(request):
             launched = str(dt.dt_from_decimal(launch.launched_at))
         results.append([launch.instance, launched, launch.instance_type_id])
 
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_list_usage_deletes(request):
@@ -360,7 +367,7 @@ def do_list_usage_deletes(request):
             deleted = str(dt.dt_from_decimal(delete.deleted_at))
         results.append([delete.instance, launched, deleted])
 
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_list_usage_exists(request):
@@ -392,7 +399,7 @@ def do_list_usage_exists(request):
                         exist.instance_type_id, exist.message_id,
                         exist.status])
 
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_jsonreports(request):
@@ -412,7 +419,7 @@ def do_jsonreports(request):
                         float(report.created),
                         report.name,
                         report.version])
-    return rsp(results)
+    return rsp(json.dumps(results))
 
 
 def do_jsonreport(request, report_id):
