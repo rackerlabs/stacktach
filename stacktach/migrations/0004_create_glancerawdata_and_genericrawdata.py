@@ -22,8 +22,8 @@ class Migration(SchemaMigration):
             ('host', self.gf('django.db.models.fields.CharField')(db_index=True, max_length=100, null=True, blank=True)),
             ('instance', self.gf('django.db.models.fields.CharField')(db_index=True, max_length=50, null=True, blank=True)),
             ('request_id', self.gf('django.db.models.fields.CharField')(db_index=True, max_length=50, null=True, blank=True)),
-            ('uuid', self.gf('django.db.models.fields.CharField')(max_length=50)),
-            ('status', self.gf('django.db.models.fields.CharField')(default='queued', max_length=50, db_index=True)),
+            ('uuid', self.gf('django.db.models.fields.CharField')(db_index=True, max_length=50, null=True, blank=True)),
+            ('status', self.gf('django.db.models.fields.CharField')(default='', max_length=50, db_index=True)),
             ('image_type', self.gf('django.db.models.fields.IntegerField')(default=0, null=True, db_index=True)),
         ))
         db.send_create_signal(u'stacktach', ['GlanceRawData'])
@@ -91,8 +91,8 @@ class Migration(SchemaMigration):
             'request_id': ('django.db.models.fields.CharField', [], {'db_index': 'True', 'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'routing_key': ('django.db.models.fields.CharField', [], {'db_index': 'True', 'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'service': ('django.db.models.fields.CharField', [], {'db_index': 'True', 'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'status': ('django.db.models.fields.CharField', [], {'default': "'queued'", 'max_length': '50', 'db_index': 'True'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'status': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '50', 'db_index': 'True'}),
+            'uuid': ('django.db.models.fields.CharField', [], {'db_index': 'True', 'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'when': ('django.db.models.fields.DecimalField', [], {'max_digits': '20', 'decimal_places': '6', 'db_index': 'True'})
         },
         u'stacktach.instancedeletes': {

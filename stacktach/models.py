@@ -224,6 +224,7 @@ class GlanceRawData(models.Model):
     PENDING_DELETE = 'pending_delete'
     QUEUED = 'queued'
     SAVING = 'saving'
+    NONE = ''
     STATUS_CHOICES = [
         (ACTIVE, 'Active'),
         (DELETED, 'Deleted'),
@@ -231,11 +232,12 @@ class GlanceRawData(models.Model):
         (PENDING_DELETE, 'Pending delete'),
         (QUEUED, 'Queued'),
         (SAVING, 'Saving'),
+        (NONE, '')
     ]
 
     deployment = models.ForeignKey(Deployment)
-    owner = models.CharField(max_length=50, null=True, blank=True,
-                              db_index=True)
+    owner = models.CharField(max_length=255, null=True, blank=True,
+                             db_index=True)
     json = models.TextField()
     routing_key = models.CharField(max_length=50, null=True, blank=True,
                                    db_index=True)
@@ -252,9 +254,10 @@ class GlanceRawData(models.Model):
                                 db_index=True)
     request_id = models.CharField(max_length=50, null=True, blank=True,
                                   db_index=True)
-    uuid = models.CharField(max_length=50)
-    status = models.CharField(max_length=50, db_index=True,
-                              choices=STATUS_CHOICES, default=QUEUED)
+    uuid = models.CharField(max_length=36, null=True, blank=True,
+                            db_index=True)
+    status = models.CharField(max_length=30, db_index=True,
+                              choices=STATUS_CHOICES, default=NONE)
     image_type = models.IntegerField(null=True, default=0, db_index=True)
 
     @staticmethod
