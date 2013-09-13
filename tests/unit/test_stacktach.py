@@ -50,6 +50,9 @@ class StacktachRawParsingTestCase(StacktachBaseTestCase):
     def tearDown(self):
         self.mox.UnsetStubs()
 
+    def test_should_fail(self):
+        self.assertTrue(False)
+
     def assertOnHandlerResponse(self, resp, **kwargs):
         for key in kwargs:
             self.assertTrue(key in resp, msg='%s not in response' % key)
