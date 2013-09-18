@@ -5,6 +5,7 @@ import os
 import sys
 
 sys.path.append(os.environ.get('STACKTACH_INSTALL_DIR', '/stacktach'))
+from django.db.models import F
 from reports import usage_audit
 from stacktach import models
 from stacktach import datetime_to_decimal as dt
@@ -26,7 +27,7 @@ def audit_usages_to_exists(exists, usages):
     for (uuid, launches) in usages.items():
         if uuid not in exists:
             msg = "No exists for usage (%s)" % uuid
-            fails.append(['Usage', '-', msg])
+            fails.append(['Usage', launches[0]['id'], msg])
     return fails
 
 def _get_new_launches(beginning, ending):
@@ -58,7 +59,7 @@ def audit_for_period(beginning, ending):
     ending_decimal = dt.dt_to_decimal(ending)
 
     (verify_summary,
-     verify_detail) = usage_audit._verifier_audit_for_day(beginning_decimal,
+     verify_detail) = _verifier_audit_for_day(beginning_decimal,
                                                           ending_decimal,
                                                           models.ImageExists)
     detail, new_count, old_count = _launch_audit_for_period(beginning_decimal,
@@ -80,6 +81,53 @@ def audit_for_period(beginning, ending):
 
     return summary, details
 
+def _verifier_audit_for_day(beginning, ending, exists_model):
+    summary = {}
+    period = 60*60*24-0.000001
+    if args.period_length == 'hour':
+        period = 60*60-0.000001
+    filters = {
+        'raw__when__gte': beginning,
+        'raw__when__lte': ending,
+        'audit_period_ending': F('audit_period_beginning') + period
+
+    }
+    instant_exists = exists_model.objects.filter(**filters)
+    summary['exists'] = _audit_for_exists(instant_exists)
+
+    filters = {
+        'raw__when__gte': beginning,
+        'raw__when__lte': ending,
+        'status': exists_model.FAILED
+    }
+    failed = exists_model.objects.filter(**filters)
+    detail = []
+    for exist in failed:
+        detail.append(['Exist', exist.id, exist.fail_reason])
+    return summary, detail
+
+def _audit_for_exists(exists_query):
+    (verified, reconciled,
+     fail, pending, verifying) = usage_audit._status_queries(exists_query)
+
+    (success, unsent, redirect,
+     client_error, server_error) = usage_audit._send_status_queries(verified)
+
+    report = {
+        'count': exists_query.count(),
+        'verified': verified.count(),
+        'failed': fail.count(),
+        'pending': pending.count(),
+        'verifying': verifying.count(),
+        'send_status': {
+            'success': success.count(),
+            'unsent': unsent.count(),
+            'redirect': redirect.count(),
+            'client_error': client_error.count(),
+            'server_error': server_error.count(),
+        }
+    }
+    return report
 
 def _launch_audit_for_period(beginning, ending):
     launches_dict = {}
@@ -103,16 +151,7 @@ def _launch_audit_for_period(beginning, ending):
     for launch in old_launches:
         uuid = launch.uuid
         l = {'id': launch.id, 'created_at': launch.created_at}
-        if uuid not in old_launches_dict or \
-                (old_launches_dict[uuid]['created_at'] <
-                 launch.created_at):
-            old_launches_dict[uuid] = l
-
-    for uuid, launch in old_launches_dict.items():
-        if uuid in launches_dict:
-            launches_dict[uuid].append(launch)
-        else:
-            launches_dict[uuid] = [launch, ]
+        old_launches_dict[uuid] = l
 
     exists_dict = {}
     exists = _get_exists(beginning, ending)
@@ -126,8 +165,7 @@ def _launch_audit_for_period(beginning, ending):
         else:
             exists_dict[uuid] = [e, ]
 
-    launch_to_exists_fails = audit_usages_to_exists(launches_dict,
-                                                       exists_dict)
+    launch_to_exists_fails = audit_usages_to_exists(exists_dict,launches_dict)
     return launch_to_exists_fails, new_launches.count(), len(old_launches_dict)
 
 
