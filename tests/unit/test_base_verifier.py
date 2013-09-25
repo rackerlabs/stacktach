@@ -2,8 +2,10 @@ import datetime
 import time
 from django.db import transaction
 import mox
+
 from stacktach import message_service
 from tests.unit import StacktachBaseTestCase
+from tests.unit.utils import IsCallable
 from tests.unit.utils import HOST, PORT, VIRTUAL_HOST, USERID, PASSWORD, TICK_TIME, SETTLE_TIME, SETTLE_UNITS
 from tests.unit.utils import make_verifier_config
 from verifier import base_verifier
@@ -141,7 +143,7 @@ class BaseVerifierTestCase(StacktachBaseTestCase):
     def test_run_notifications(self):
         self._mock_exchange_create_and_connect(self.verifier_with_notifications)
         self.mox.StubOutWithMock(self.verifier_with_notifications, '_run')
-        self.verifier_with_notifications._run(callback=mox.Not(mox.Is(None)))
+        self.verifier_with_notifications._run(callback=IsCallable())
         self.mox.ReplayAll()
         self.verifier_with_notifications.run()
         self.mox.VerifyAll()
@@ -149,7 +151,7 @@ class BaseVerifierTestCase(StacktachBaseTestCase):
     def test_run_notifications_with_routing_keys(self):
         self._mock_exchange_create_and_connect(self.verifier_with_notifications)
         self.mox.StubOutWithMock(self.verifier_with_notifications, '_run')
-        self.verifier_with_notifications._run(callback=mox.Not(mox.Is(None)))
+        self.verifier_with_notifications._run(callback=IsCallable())
         self.mox.ReplayAll()
         self.verifier_with_notifications.run()
         self.mox.VerifyAll()
@@ -186,7 +188,7 @@ class BaseVerifierTestCase(StacktachBaseTestCase):
         result2.ready().AndReturn(True)
         result2.successful().AndReturn(True)
         result2.get().AndReturn((True, None))
-        self.verifier_without_notifications.reconcile_failed()
+        self.verifier_without_notifications.reconcile_failed(callback=None)
         self.mox.StubOutWithMock(time, 'sleep', use_mock_anything=True)
         time.sleep(TICK_TIME)
         self.verifier_without_notifications._keep_running().AndReturn(False)
@@ -212,8 +214,9 @@ class BaseVerifierTestCase(StacktachBaseTestCase):
         settle_offset = {SETTLE_UNITS: SETTLE_TIME}
         ending_max = start - datetime.timedelta(**settle_offset)
         self.mox.StubOutWithMock(self.verifier_with_notifications, 'verify_for_range')
+
         self.verifier_with_notifications.verify_for_range(ending_max,
-                                             callback=mox.Not(mox.Is(None)))
+                                             callback=IsCallable())
         self.mox.StubOutWithMock(self.verifier_with_notifications, 'reconcile_failed')
         result1 = self.mox.CreateMockAnything()
         result2 = self.mox.CreateMockAnything()
@@ -224,7 +227,7 @@ class BaseVerifierTestCase(StacktachBaseTestCase):
         result2.ready().AndReturn(True)
         result2.successful().AndReturn(True)
         result2.get().AndReturn((True, None))
-        self.verifier_with_notifications.reconcile_failed()
+        self.verifier_with_notifications.reconcile_failed(callback=IsCallable())
         self.mox.StubOutWithMock(time, 'sleep', use_mock_anything=True)
         time.sleep(TICK_TIME)
         self.verifier_with_notifications._keep_running().AndReturn(False)

@@ -307,9 +307,14 @@ class NovaVerifier(base_verifier.Verifier):
                     next_update = datetime.datetime.utcnow() + update_interval
         return count
 
-    def reconcile_failed(self):
+    def reconcile_failed(self, callback=None):
         for failed_exist in self.failed:
-            self.reconciler.failed_validation(failed_exist)
+            reconciled = self.reconciler.failed_validation(failed_exist)
+            if reconciled:
+                failed_exist.mark_verified(reconciled=True,
+                                           initial_reconcile=True)
+            if callable(callback):
+                callback((reconciled, failed_exist))
         self.failed = []
 
     def exchange(self):

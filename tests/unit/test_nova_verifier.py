@@ -1089,10 +1089,47 @@ class NovaVerifierTestCase(StacktachBaseTestCase):
         exists1 = self.mox.CreateMockAnything()
         exists2 = self.mox.CreateMockAnything()
         self.verifier.failed = [exists1, exists2]
-        self.reconciler.failed_validation(exists1)
-        self.reconciler.failed_validation(exists2)
+        self.reconciler.failed_validation(exists1).AndReturn(True)
+        self.reconciler.failed_validation(exists2).AndReturn(True)
+        exists1.mark_verified(reconciled=True, initial_reconcile=True)
+        exists2.mark_verified(reconciled=True, initial_reconcile=True)
         self.mox.ReplayAll()
         self.verifier.reconcile_failed()
+        self.assertEqual(len(self.verifier.failed), 0)
+        self.mox.VerifyAll()
+
+    def test_reconcile_failed_not_reconciled(self):
+        self.verifier.reconcile = True
+        exists1 = self.mox.CreateMockAnything()
+        self.verifier.failed = [exists1]
+        self.reconciler.failed_validation(exists1).AndReturn(False)
+        self.mox.ReplayAll()
+        self.verifier.reconcile_failed()
+        self.assertEqual(len(self.verifier.failed), 0)
+        self.mox.VerifyAll()
+
+    def test_reconcile_failed_with_callback_reconciled(self):
+        self.verifier.reconcile = True
+        callback = self.mox.CreateMockAnything()
+        exists1 = self.mox.CreateMockAnything()
+        self.verifier.failed = [exists1]
+        self.reconciler.failed_validation(exists1).AndReturn(True)
+        exists1.mark_verified(reconciled=True, initial_reconcile=True)
+        callback((True, exists1))
+        self.mox.ReplayAll()
+        self.verifier.reconcile_failed(callback=callback)
+        self.assertEqual(len(self.verifier.failed), 0)
+        self.mox.VerifyAll()
+
+    def test_reconcile_failed_with_callback_not_reconciled(self):
+        self.verifier.reconcile = True
+        callback = self.mox.CreateMockAnything()
+        exists1 = self.mox.CreateMockAnything()
+        self.verifier.failed = [exists1]
+        self.reconciler.failed_validation(exists1).AndReturn(False)
+        callback((False, exists1))
+        self.mox.ReplayAll()
+        self.verifier.reconcile_failed(callback=callback)
         self.assertEqual(len(self.verifier.failed), 0)
         self.mox.VerifyAll()
 

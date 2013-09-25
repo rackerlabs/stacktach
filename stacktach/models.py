@@ -249,12 +249,14 @@ class InstanceExists(models.Model):
     PENDING = 'pending'
     VERIFYING = 'verifying'
     VERIFIED = 'verified'
+    INITIAL_RECONCILE = 'initial_reconcile'
     RECONCILED = 'reconciled'
     FAILED = 'failed'
     STATUS_CHOICES = [
         (PENDING, 'Pending Verification'),
         (VERIFYING, 'Currently Being Verified'),
         (VERIFIED, 'Passed Verification'),
+        (INITIAL_RECONCILE, 'Initially Failed And Triggered Reconciliation'),
         (RECONCILED, 'Passed Verification After Reconciliation'),
         (FAILED, 'Failed Verification'),
     ]
@@ -303,11 +305,16 @@ class InstanceExists(models.Model):
         return InstanceExists.objects.select_related()\
             .filter(**params).order_by('id')
 
-    def mark_verified(self, reconciled=False, reason=None):
+    def mark_verified(self, reconciled=False, initial_reconcile=False,
+                      reason=None):
         if not reconciled:
             self.status = InstanceExists.VERIFIED
         else:
-            self.status = InstanceExists.RECONCILED
+            if not initial_reconcile:
+                self.status = InstanceExists.RECONCILED
+            else:
+                self.status = InstanceExists.INITIAL_RECONCILE
+
             if reason is not None:
                 self.fail_reason = reason
 

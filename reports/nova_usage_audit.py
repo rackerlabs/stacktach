@@ -27,6 +27,7 @@ import os
 sys.path.append(os.environ.get('STACKTACH_INSTALL_DIR', '/stacktach'))
 
 from django.db.models import F
+from django.db.models import Q
 
 from stacktach import datetime_to_decimal as dt
 from stacktach import models
@@ -126,11 +127,12 @@ def _audit_launches_to_exists(launches, exists, beginning):
 def _status_queries(exists_query):
     verified = exists_query.filter(status=models.InstanceExists.VERIFIED)
     reconciled = exists_query.filter(status=models.InstanceExists.RECONCILED)
+    init_reconcile = exists_query.filter(status=models.InstanceExists.INITIAL_RECONCILE)
     fail = exists_query.filter(status=models.InstanceExists.FAILED)
     pending = exists_query.filter(status=models.InstanceExists.PENDING)
     verifying = exists_query.filter(status=models.InstanceExists.VERIFYING)
 
-    return verified, reconciled, fail, pending, verifying
+    return verified, reconciled, init_reconcile, fail, pending, verifying
 
 
 def _send_status_queries(exists_query):
@@ -147,16 +149,24 @@ def _send_status_queries(exists_query):
 
 
 def _audit_for_exists(exists_query):
-    (verified, reconciled,
+    (verified, reconciled, init_reconciled,
      fail, pending, verifying) = _status_queries(exists_query)
 
     (success, unsent, redirect,
      client_error, server_error) = _send_status_queries(verified)
 
+    (success_init, unsent_init,
+     redirect_init, client_error_init,
+     server_error_init) = _send_status_queries(init_reconciled)
+
+    (success_rec, unsent_rec, redirect_rec,
+     client_error_rec, server_error_rec) = _send_status_queries(reconciled)
+
     report = {
         'count': exists_query.count(),
         'verified': verified.count(),
         'reconciled': reconciled.count(),
+        'init_reconcile': init_reconciled.count(),
         'failed': fail.count(),
         'pending': pending.count(),
         'verifying': verifying.count(),
@@ -166,6 +176,20 @@ def _audit_for_exists(exists_query):
             'redirect': redirect.count(),
             'client_error': client_error.count(),
             'server_error': server_error.count(),
+        },
+        'send_status_rec': {
+            'success': success_rec.count(),
+            'unsent': unsent_rec.count(),
+            'redirect': redirect_rec.count(),
+            'client_error': client_error_rec.count(),
+            'server_error': server_error_rec.count(),
+        },
+        'send_status_init': {
+            'success': success_init.count(),
+            'unsent': unsent_init.count(),
+            'redirect': redirect_init.count(),
+            'client_error': client_error_init.count(),
+            'server_error': server_error_init.count(),
         }
     }
 
@@ -195,13 +219,18 @@ def _verifier_audit_for_day(beginning, ending):
 
     filters = {
         'raw__when__gte': beginning,
-        'raw__when__lte': ending,
-        'status': models.InstanceExists.FAILED
+        'raw__when__lte': ending
     }
-    failed = models.InstanceExists.objects.filter(**filters)
+    status = (Q(status=models.InstanceExists.FAILED) |
+              Q(status=models.InstanceExists.INITIAL_RECONCILE))
+
+    failed = models.InstanceExists.objects.filter(**filters).filter(status)
     detail = []
     for exist in failed:
-        detail.append(['Exist', exist.id, exist.fail_reason])
+        reconciled = 'N'
+        if exist.status == models.InstanceExists.INITIAL_RECONCILE:
+            reconciled = 'Y'
+        detail.append(['Exist', exist.id, exist.fail_reason, reconciled])
     return summary, detail
 
 
@@ -328,7 +357,7 @@ def store_results(start, end, summary, details):
         'created': dt.dt_to_decimal(datetime.datetime.utcnow()),
         'period_start': start,
         'period_end': end,
-        'version': 4,
+        'version': 5,
         'name': 'nova usage audit'
     }
 
