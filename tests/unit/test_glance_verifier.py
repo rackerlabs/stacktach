@@ -521,7 +521,7 @@ class GlanceVerifierTestCase(StacktachBaseTestCase):
             producer.acquire(block=True).AndReturn(producer)
             producer.__enter__().AndReturn(producer)
             kombu.common.maybe_declare(exchange, producer.channel)
-            message = {'event_type': 'image.exists.verified.old',
+            message = {'event_type': 'image.exists.verified',
                        'message_id': 'some_other_uuid',
                        'original_message_id': 'some_uuid'}
             producer.publish(message, key)
@@ -562,7 +562,7 @@ class GlanceVerifierTestCase(StacktachBaseTestCase):
         kombu.common.maybe_declare(exchange, producer.channel)
         self.mox.StubOutWithMock(uuid, 'uuid4')
         uuid.uuid4().AndReturn('some_other_uuid')
-        message = {'event_type': 'image.exists.verified.old',
+        message = {'event_type': 'image.exists.verified',
                    'message_id': 'some_other_uuid',
                    'original_message_id': 'some_uuid'}
         producer.publish(message, exist_dict[0])
