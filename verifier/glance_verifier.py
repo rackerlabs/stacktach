@@ -116,11 +116,6 @@ def _verify_for_delete(exist, delete=None):
 
     if delete:
         if not base_verifier._verify_date_field(
-                delete.created_at, exist.created_at, same_second=True):
-            raise FieldMismatch('created_at', exist.created_at,
-                                delete.created_at)
-
-        if not base_verifier._verify_date_field(
                 delete.deleted_at, exist.deleted_at, same_second=True):
             raise FieldMismatch('deleted_at', exist.deleted_at,
                                 delete.deleted_at)
@@ -171,6 +166,10 @@ class GlanceVerifier(Verifier):
 
     def send_verified_notification(self, exist, connection, exchange,
                                    routing_keys=None):
+        if not models.ImageExists.are_all_exists_for_owner_verified(
+                exist.owner, exist.audit_period_beginning,
+                exist.audit_period_ending):
+            return
         body = exist.raw.json
         json_body = json.loads(body)
         json_body[1]['event_type'] = 'image.exists.verified.old'
