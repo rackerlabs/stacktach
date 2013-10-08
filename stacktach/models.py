@@ -486,10 +486,17 @@ class ImageExists(models.Model):
         self.status = new_status
 
     @staticmethod
-    def find(ending_max, status):
+    def find_and_group_by_owner(ending_max, status):
         params = {'audit_period_ending__lte': dt.dt_to_decimal(ending_max),
                   'status': status}
-        return ImageExists.objects.select_related().filter(**params).order_by('id')
+        ordered_exists = ImageExists.objects.select_related().filter(**params).order_by('owner')
+        result = {}
+        for exist in ordered_exists:
+            if exist.owner in result:
+                result[exist.owner].append(exist)
+            else:
+                result[exist.owner] = [exist]
+        return result
 
     def mark_verified(self):
         self.status = InstanceExists.VERIFIED
@@ -508,7 +515,7 @@ class ImageExists(models.Model):
             ~Q(status=ImageExists.VERIFIED),
             audit_period_beginning=audit_period_beginning,
             audit_period_ending=audit_period_ending,
-            owner=owner).count() == 0
+            owner=owner).exists()
 
 
 def get_model_fields(model):
