@@ -1042,6 +1042,30 @@ class NovaVerifierTestCase(StacktachBaseTestCase):
         self.verifier.verify_for_range(when_max)
         self.mox.VerifyAll()
 
+    def test_verify_for_range_without_callback(self):
+        when_max = datetime.datetime.utcnow()
+        results = self.mox.CreateMockAnything()
+        models.InstanceExists.PENDING = 'pending'
+        models.InstanceExists.VERIFYING = 'verifying'
+        models.InstanceExists.find(
+            ending_max=when_max, status='pending').AndReturn(results)
+        results.count().AndReturn(2)
+        exist1 = self.mox.CreateMockAnything()
+        exist2 = self.mox.CreateMockAnything()
+        results.__getslice__(0, 1000).AndReturn(results)
+        results.__iter__().AndReturn([exist1, exist2].__iter__())
+        exist1.update_status('verifying')
+        exist2.update_status('verifying')
+        exist1.save()
+        exist2.save()
+        self.pool.apply_async(nova_verifier._verify, args=(exist1, 'all'),
+                              callback=None)
+        self.pool.apply_async(nova_verifier._verify, args=(exist2, 'all'),
+                              callback=None)
+        self.mox.ReplayAll()
+        self.verifier.verify_for_range(when_max)
+        self.mox.VerifyAll()
+
     def test_verify_for_range_with_callback(self):
         callback = self.mox.CreateMockAnything()
         when_max = datetime.datetime.utcnow()
@@ -1105,7 +1129,7 @@ class NovaVerifierTestCase(StacktachBaseTestCase):
             producer.acquire(block=True).AndReturn(producer)
             producer.__enter__().AndReturn(producer)
             kombu.common.maybe_declare(exchange, producer.channel)
-            message = {'event_type': 'compute.instance.exists.verified.old',
+            message = {'event_type': 'compute.instance.exists.verified',
                        'message_id': 'some_other_uuid',
                        'original_message_id': 'some_uuid'}
             producer.publish(message, key)
@@ -1140,7 +1164,7 @@ class NovaVerifierTestCase(StacktachBaseTestCase):
         kombu.common.maybe_declare(exchange, producer.channel)
         self.mox.StubOutWithMock(uuid, 'uuid4')
         uuid.uuid4().AndReturn('some_other_uuid')
-        message = {'event_type': 'compute.instance.exists.verified.old',
+        message = {'event_type': 'compute.instance.exists.verified',
                    'message_id': 'some_other_uuid',
                    'original_message_id': 'some_uuid'}
         producer.publish(message, exist_dict[0])
