@@ -161,17 +161,24 @@ class Verifier(object):
                 exchange_name, 'topic',
                 durable=self.config.durable_queue())
             routing_keys = self.config.topics()[exchange_name]
-
             with message_service.create_connection(
                 self.config.host(), self.config.port(),
                 self.config.userid(), self.config.password(),
                 "librabbitmq", self.config.virtual_host()) as conn:
                 def callback(result):
-                    (verified, exist) = result
-                    if verified:
-                        self.send_verified_notification(
-                            exist, conn, exchange, routing_keys=routing_keys)
+                    try:
+                        #Handle obscure mysql and Django multiprocessing bug
+                        #http://python.6.x6.nabble.com/Python-Multiprocessing-With-Django-td231840.html
+                        from django.db import connection
+                        connection.close()
 
+                        (verified, exist) = result
+                        if verified:
+                            self.send_verified_notification(
+                                exist, conn, exchange,
+                                routing_keys=routing_keys)
+                    except Exception, e:
+                        LOG.exception("%s: %s" % (exchange_name, e))
                 try:
                     self._run(callback=callback)
                 except Exception, e:
