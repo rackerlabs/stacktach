@@ -102,9 +102,9 @@ class Consumer(kombu.mixins.ConsumerMixin):
         raw, notif = views.process_raw_data(
             self.deployment, args, asJson, self.exchange)
 
-        self.processed += 1
-        message.ack()
         POST_PROCESS_METHODS[raw.get_name()](raw, notif)
+        message.ack()
+        self.processed += 1
 
         self._check_memory()
 
