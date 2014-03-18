@@ -305,6 +305,7 @@ class InstanceExists(models.Model):
     bandwidth_public_out = models.BigIntegerField(default=0)
     instance_flavor_id = models.CharField(max_length=100, null=True,
                                           blank=True, db_index=True)
+    event_id = models.CharField(max_length=50, null=True,blank=True)
 
     def deployment(self):
         return self.raw.deployment
@@ -337,6 +338,9 @@ class InstanceExists(models.Model):
 
     def update_status(self, new_status):
         self.status = new_status
+
+    def is_image_type_import(self):
+        return (self.raw.image_type & 0xf) == 3
 
     @staticmethod
     def mark_exists_as_sent_unverified(message_ids):
@@ -522,6 +526,8 @@ class ImageExists(models.Model):
     size = models.BigIntegerField(max_length=20)
     message_id = models.CharField(max_length=50, null=True,
                                   blank=True, db_index=True)
+    event_id = models.CharField(max_length=50, null=True,blank=True)
+
 
     def update_status(self, new_status):
         self.status = new_status
