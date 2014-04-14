@@ -1,16 +1,18 @@
-# Copyright 2012 - Dark Secret Software Inc.
-# All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License"); you may
-# not use this file except in compliance with the License. You may obtain
-# a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
 # under the License.
 import datetime
 import copy
@@ -181,6 +183,16 @@ class InstanceUsage(models.Model):
         raw = raws[0]
         return raw.deployment
 
+    def latest_deployment_for_request_id(self):
+        return self.latest_raw_for_request_id().deployment
+
+    def latest_raw_for_request_id(self):
+        return RawData.objects.filter(
+            request_id=self.request_id).order_by('-id')[0]
+
+    def host(self):
+        return self.latest_raw_for_request_id().host
+
     @staticmethod
     def find(instance, launched_at):
         start = launched_at - datetime.timedelta(
@@ -305,6 +317,7 @@ class InstanceExists(models.Model):
     bandwidth_public_out = models.BigIntegerField(default=0)
     instance_flavor_id = models.CharField(max_length=100, null=True,
                                           blank=True, db_index=True)
+    event_id = models.CharField(max_length=50, null=True,blank=True)
 
     def deployment(self):
         return self.raw.deployment
@@ -350,6 +363,7 @@ class InstanceExists(models.Model):
                 exists = InstanceExists.objects.get(message_id=message_id)
                 if exists.status == InstanceExists.PENDING:
                     exists.status = InstanceExists.SENT_UNVERIFIED
+                    exists.send_status = '201'
                     exists.save()
                 else:
                     exists_not_pending.append(message_id)
@@ -401,6 +415,22 @@ class JsonReport(models.Model):
     name = models.CharField(max_length=50, db_index=True)
     version = models.IntegerField(default=1)
     json = models.TextField()
+
+
+class TenantType(models.Model):
+    name = models.CharField(max_length=50, db_index=True)
+    value = models.CharField(max_length=50, db_index=True)
+
+
+class TenantInfo(models.Model):
+    """This contains tenant information synced from an external source.
+    It's mostly used as a cache to put things like tenant name on reports
+    without making alot of calls to an external system."""
+    tenant = models.CharField(max_length=50, db_index=True, unique=True)
+    name = models.CharField(max_length=100, null=True,
+                            blank=True, db_index=True)
+    types = models.ManyToManyField(TenantType)
+    last_updated = models.DateTimeField(db_index=True)
 
 
 class GlanceRawData(models.Model):
@@ -525,6 +555,8 @@ class ImageExists(models.Model):
     size = models.BigIntegerField(max_length=20)
     message_id = models.CharField(max_length=50, null=True,
                                   blank=True, db_index=True)
+    event_id = models.CharField(max_length=50, null=True,blank=True)
+
 
     def update_status(self, new_status):
         self.status = new_status
@@ -567,6 +599,7 @@ class ImageExists(models.Model):
                 for exists in exists_list:
                     if exists.status == ImageExists.PENDING:
                         exists.status = ImageExists.SENT_UNVERIFIED
+                        exists.send_status = '201'
                         exists.save()
                     else:
                         exists_not_pending.append(message_id)
