@@ -9,6 +9,9 @@ Package: stacktach
 Architecture: all
 XB-Python-Version: ${python:Versions}
 Depends: ${python:Depends},
+	libmysqlclient-dev,
 	python-mysqldb,
-	python-django (>= 1.4.2), python-django-south, python-kombu
+	python-django (>= 1.4.2), python-django-south, python-kombu,
+	python-librabbitmq,
+	python-pip
 Description: OpenStack Tachometer
