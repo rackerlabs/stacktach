@@ -26,6 +26,9 @@ case "$1" in
 	    chown stacktach. /var/log/stacktach
 	    pip install amqp anyjson coverage Django kombu librabbitmq mox MySQL-python nose nose-exclude Pympler South
 	    pip install -U South
+		echo 'Almost done. At least mysql database setup and worker config needed to go.'
+		echo 'Official how-to:'
+		echo 'https://media.readthedocs.org/pdf/stacktach/latest/stacktach.pdf'
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

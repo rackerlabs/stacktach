@@ -1,7 +1,7 @@
 Source: stacktach
 Section: admin
 Priority: extra
-Maintainer: Vladimir Eremin <yottatsa@yandex-team.ru>
+Maintainer: Vladimir Eremin <yottatsa@yandex-team.ru>, Danil Akhmetov <dinobot@yandex-team.ru>
 Build-Depends: debhelper (>= 7.0.0), cdbs
 Standards-Version: 3.9.2
 
