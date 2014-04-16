@@ -1,6 +1,6 @@
 stacktach (1.0-1) precise-havana; urgency=low
 
-  * Debianisaton updated to let stacktach ALMOST run on debian out of the box.  More precisely: package depends added, pip install $necessary_modules_lsit, etc. 
+  * Debianisaton updated to let stacktach run on debian ALMOST out of the box.  More precisely: package depends added, pip install $necessary_modules_lsit, etc. 
   * Database / worker configuration still needed to be done manually (or by separate meta-package). 
 
  -- Danil Akhmetov <dinobot@yandex-team.ru>  Wed, 15 Apr 2014 16:33:53 +0400
