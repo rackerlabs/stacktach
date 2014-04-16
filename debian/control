@@ -9,7 +9,7 @@ Package: stacktach
 Architecture: all
 XB-Python-Version: ${python:Versions}
 Depends: ${python:Depends},
-	libmysqlclient-dev,
+	mysql-server, libmysqlclient-dev, nginx,
 	python-mysqldb,
 	python-django (>= 1.4.2), python-django-south, python-kombu,
 	python-librabbitmq,

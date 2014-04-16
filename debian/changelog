@@ -1,6 +1,7 @@
-stacktach (1.0) precise-havana; urgency=low
+stacktach (1.0-1) precise-havana; urgency=low
 
-  * changes goes here
+  * Debianisaton updated to let stacktach ALMOST run on debian out of the box.  More precisely: package depends added, pip install $necessary_modules_lsit, etc. 
+  * Database / worker configuration still needed to be done manually (or by separate meta-package). 
 
  -- Danil Akhmetov <dinobot@yandex-team.ru>  Wed, 15 Apr 2014 16:33:53 +0400
 

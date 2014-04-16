@@ -25,6 +25,7 @@ case "$1" in
 	    mkdir -p /var/log/stacktach
 	    chown stacktach. /var/log/stacktach
 	    pip install amqp anyjson coverage Django kombu librabbitmq mox MySQL-python nose nose-exclude Pympler South
+	    pip install -U South
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
