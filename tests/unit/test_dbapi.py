@@ -1463,10 +1463,34 @@ class StacktachRepairScenarioApi(StacktachBaseTestCase):
                        "14fd94b5-64dd-4559-83b7-981d9d4f7a5a",
                        "24fd94b5-64dd-4559-83b7-981d9d4f7a5a"]
         request.POST._iterlists().AndReturn([('service', ['nova']),
-                                             ('message_ids', message_ids)])
+                                             ('message_ids', message_ids),
+                                             ('event_ids_present', False)])
         self.mox.StubOutWithMock(models.InstanceExists,
                                  'mark_exists_as_sent_unverified')
-        models.InstanceExists.mark_exists_as_sent_unverified(message_ids).\
+        models.InstanceExists.mark_exists_as_sent_unverified(message_ids, False).\
+            AndReturn([[], []])
+        self.mox.ReplayAll()
+
+        response = dbapi.repair_stacktach_down(request)
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['exists_not_pending'], [])
+        self.assertEqual(response_data['absent_exists'], [])
+
+        self.mox.VerifyAll()
+
+    def test_change_nova_exists_status_and_save_event_id_for_all_exists(self):
+        request = self.mox.CreateMockAnything()
+        request.POST = self.mox.CreateMockAnything()
+        message_ids = [["04fd94b5-64dd-4559-83b7-981d9d4f7a5a", "123"],
+                       ["14fd94b5-64dd-4559-83b7-981d9d4f7a5a", "345"],
+                       ["24fd94b5-64dd-4559-83b7-981d9d4f7a5a", "456"]]
+        request.POST._iterlists().AndReturn([('service', ['nova']),
+                                             ('message_ids', message_ids),
+                                             ('event_ids_present', True)])
+        self.mox.StubOutWithMock(models.InstanceExists,
+                                 'mark_exists_as_sent_unverified')
+        models.InstanceExists.mark_exists_as_sent_unverified(message_ids, True).\
             AndReturn([[], []])
         self.mox.ReplayAll()
 
@@ -1485,10 +1509,34 @@ class StacktachRepairScenarioApi(StacktachBaseTestCase):
                        '14fd94b5-64dd-4559-83b7-981d9d4f7a5a',
                        '24fd94b5-64dd-4559-83b7-981d9d4f7a5a']
         request.POST._iterlists().AndReturn([('service', ['glance']),
-                                             ('message_ids', message_ids)])
+                                             ('message_ids', message_ids),
+                                             ('event_ids_present', False)])
         self.mox.StubOutWithMock(models.ImageExists,
                                  'mark_exists_as_sent_unverified')
-        models.ImageExists.mark_exists_as_sent_unverified(message_ids).\
+        models.ImageExists.mark_exists_as_sent_unverified(message_ids, False).\
+            AndReturn([[], []])
+        self.mox.ReplayAll()
+
+        response = dbapi.repair_stacktach_down(request)
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['exists_not_pending'], [])
+        self.assertEqual(response_data['absent_exists'], [])
+
+        self.mox.VerifyAll()
+
+    def test_change_glance_exists_status_and_save_event_id_for_all_exists(self):
+        request = self.mox.CreateMockAnything()
+        request.POST = self.mox.CreateMockAnything()
+        message_ids = [["04fd94b5-64dd-4559-83b7-981d9d4f7a5a", "123"],
+                       ["14fd94b5-64dd-4559-83b7-981d9d4f7a5a", "345"],
+                       ["24fd94b5-64dd-4559-83b7-981d9d4f7a5a", "456"]]
+        request.POST._iterlists().AndReturn([('service', ['glance']),
+                                             ('message_ids', message_ids),
+                                             ('event_ids_present', True)])
+        self.mox.StubOutWithMock(models.ImageExists,
+                                 'mark_exists_as_sent_unverified')
+        models.ImageExists.mark_exists_as_sent_unverified(message_ids, True).\
             AndReturn([[], []])
         self.mox.ReplayAll()
 

@@ -345,15 +345,23 @@ class InstanceExists(models.Model):
         return (self.raw.image_type & 0xf) == 3
 
     @staticmethod
-    def mark_exists_as_sent_unverified(message_ids):
+    def mark_exists_as_sent_unverified(message_ids, event_ids_present=False):
         absent_exists = []
         exists_not_pending = []
-        for message_id in message_ids:
+        for instance_info in message_ids:
             try:
+                if event_ids_present:
+                    message_id = instance_info[0]
+                    event_id = instance_info[1]
+                else:
+                    message_id = instance_info
+                print message_id
                 exists = InstanceExists.objects.get(message_id=message_id)
                 if exists.status == InstanceExists.PENDING:
                     exists.status = InstanceExists.SENT_UNVERIFIED
                     exists.send_status = '201'
+                    if event_ids_present:
+                        exists.event_id = event_id
                     exists.save()
                 else:
                     exists_not_pending.append(message_id)
@@ -580,16 +588,23 @@ class ImageExists(models.Model):
         self.save()
 
     @staticmethod
-    def mark_exists_as_sent_unverified(message_ids):
+    def mark_exists_as_sent_unverified(message_ids, event_ids_present=False):
         absent_exists = []
         exists_not_pending = []
-        for message_id in message_ids:
+        for instance_info in message_ids:
+            if event_ids_present:
+                message_id = instance_info[0]
+                event_id = instance_info[1]
+            else:
+                message_id = instance_info
             exists_list = ImageExists.objects.filter(message_id=message_id)
             if exists_list:
                 for exists in exists_list:
                     if exists.status == ImageExists.PENDING:
                         exists.status = ImageExists.SENT_UNVERIFIED
                         exists.send_status = '201'
+                        if event_ids_present:
+                            exists.event_id = event_id
                         exists.save()
                     else:
                         exists_not_pending.append(message_id)
