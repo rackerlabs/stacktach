@@ -193,6 +193,37 @@ class ImageExistsTestCase(unittest.TestCase):
         self.assertEqual(exist3.send_status, '201')
         self.mox.VerifyAll()
 
+    def test_mark_glance_exists_as_sent_unverified_and_store_event_id(self):
+        message_id_1 = "0708cb0b-6169-4d7c-9f58-3cf3d5bf694b"
+        message_id_2 = "9156b83e-f684-4ec3-8f94-7e41902f27aa"
+        message_ids = [[message_id_1, "123"],
+                       [message_id_2, "345"]]
+
+        exist1 = self.mox.CreateMockAnything()
+        exist1.status = "pending"
+        exist1.save()
+        exist2 = self.mox.CreateMockAnything()
+        exist2.status = "pending"
+        exist2.save()
+        exist3 = self.mox.CreateMockAnything()
+        exist3.status = "pending"
+        exist3.save()
+        self.mox.StubOutWithMock(ImageExists.objects, 'filter')
+        ImageExists.objects.filter(message_id=message_id_1).AndReturn([exist1])
+        ImageExists.objects.filter(message_id=message_id_2).AndReturn([exist2, exist3])
+        self.mox.ReplayAll()
+
+        results = ImageExists.mark_exists_as_sent_unverified(message_ids,
+                                                             event_ids_present=True)
+
+        self.assertEqual(results, ([], []))
+        self.assertEqual(exist1.send_status, '201')
+        self.assertEqual(exist1.event_id, '123')
+        self.assertEqual(exist2.send_status, '201')
+        self.assertEqual(exist2.event_id, '345')
+        self.assertEqual(exist3.send_status, '201')
+        self.assertEqual(exist3.event_id, '345')
+        self.mox.VerifyAll()
 
 class InstanceExistsTestCase(unittest.TestCase):
     def setUp(self):
@@ -282,3 +313,28 @@ class InstanceExistsTestCase(unittest.TestCase):
         self.assertEqual(exist1.send_status, '201')
         self.mox.VerifyAll()
 
+    def test_mark_nova_exists_as_sent_unverified_and_store_event_id(self):
+        message_id_1 = "0708cb0b-6169-4d7c-9f58-3cf3d5bf694b"
+        message_id_2 = "9156b83e-f684-4ec3-8f94-7e41902f27aa"
+        message_ids = [[message_id_1, "123"],
+                       [message_id_2, "345"]]
+
+        exist1 = self.mox.CreateMockAnything()
+        exist1.status = "pending"
+        exist1.save()
+        exist2 = self.mox.CreateMockAnything()
+        exist2.status = "pending"
+        exist2.save()
+        self.mox.StubOutWithMock(InstanceExists.objects, 'get')
+        InstanceExists.objects.get(message_id=message_id_1).AndReturn(exist1)
+        InstanceExists.objects.get(message_id=message_id_2).AndReturn(exist2)
+        self.mox.ReplayAll()
+
+        results = InstanceExists.mark_exists_as_sent_unverified(message_ids, event_ids_present=True)
+
+        self.assertEqual(results, ([], []))
+        self.assertEqual(exist1.send_status, '201')
+        self.assertEqual(exist1.event_id, '123')
+        self.assertEqual(exist2.send_status, '201')
+        self.assertEqual(exist2.event_id, '345')
+        self.mox.VerifyAll()

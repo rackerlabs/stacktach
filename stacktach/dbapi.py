@@ -505,10 +505,11 @@ def get_event_stats(request):
 def repair_stacktach_down(request):
     post_dict = dict((request.POST._iterlists()))
     message_ids = post_dict.get('message_ids')
+    event_id_present = post_dict.get('event_ids_present')
     service = post_dict.get('service', ['nova'])
     klass = _exists_model_factory(service[0])['klass']
     absent_exists, exists_not_pending = \
-        klass.mark_exists_as_sent_unverified(message_ids)
+        klass.mark_exists_as_sent_unverified(message_ids, event_id_present)
     response_data = {'absent_exists': absent_exists,
                      'exists_not_pending': exists_not_pending}
     response = HttpResponse(json.dumps(response_data),
