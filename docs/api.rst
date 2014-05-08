@@ -181,7 +181,7 @@ stacky/timings/uuid/
    Retrieve all timings for a given instance. Timings are the time
    deltas between related .start and .end notifications. For example,
    the time difference between ``compute.instance.run_instance.start``
-   and ``compute.instance.run_instance.end``.
+   and ``compute.instance.run_instance.end``. This url works only for nova.
 
    The first column of the response will be
 
@@ -217,7 +217,7 @@ stacky/timings/uuid/
       ]
 
   :query uuid: UUID of desired instance.
-  :query service: ``nova`` or ``glance``. default="nova"
+
 
 stacky/summary
 ==============
@@ -226,7 +226,7 @@ stacky/summary
 
    Returns timing summary information for each event type
    collected. Only notifications with ``.start``/``.end`` pairs
-   are considered.
+   are considered. This url works only for nova.
 
    This includes: ::
 
@@ -261,7 +261,6 @@ stacky/summary
       ]
 
   :query uuid: UUID of desired instance.
-  :query service: ``nova`` or ``glance``. default="nova"
   :query limit: the number of timings to return.
   :query offset: offset into query result set to start from.
 
@@ -275,7 +274,7 @@ stacky/request
 
    The ``?`` column will be ``E`` if the event came from the ``.error``
    queue. ``State`` and ``State'`` are the current state and the previous
-   state, respectively.
+   state, respectively. This url works only for nova.
 
    **Example request**:
 

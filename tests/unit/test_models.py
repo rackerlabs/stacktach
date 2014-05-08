@@ -135,6 +135,9 @@ class ImageExistsTestCase(unittest.TestCase):
         results = ImageExists.mark_exists_as_sent_unverified(message_ids)
 
         self.assertEqual(results, ([], []))
+        self.assertEqual(exist1.send_status, '201')
+        self.assertEqual(exist2.send_status, '201')
+        self.assertEqual(exist3.send_status, '201')
 
         self.mox.VerifyAll()
 
@@ -158,6 +161,8 @@ class ImageExistsTestCase(unittest.TestCase):
 
         self.assertEqual(results, (['9156b83e-f684-4ec3-8f94-7e41902f27aa'],
                                    []))
+        self.assertEqual(exist1.send_status, '201')
+        self.assertEqual(exist2.send_status, '201')
 
         self.mox.VerifyAll()
 
@@ -184,7 +189,8 @@ class ImageExistsTestCase(unittest.TestCase):
 
         self.assertEqual(results, ([],
                                    ["0708cb0b-6169-4d7c-9f58-3cf3d5bf694b"]))
-
+        self.assertEqual(exist1.send_status, '201')
+        self.assertEqual(exist3.send_status, '201')
         self.mox.VerifyAll()
 
 
@@ -231,7 +237,8 @@ class InstanceExistsTestCase(unittest.TestCase):
         results = InstanceExists.mark_exists_as_sent_unverified(message_ids)
 
         self.assertEqual(results, ([], []))
-
+        self.assertEqual(exist1.send_status, '201')
+        self.assertEqual(exist2.send_status, '201')
         self.mox.VerifyAll()
 
     def test_mark_exists_as_sent_unverified_return_absent_exists(self):
@@ -251,7 +258,7 @@ class InstanceExistsTestCase(unittest.TestCase):
 
         self.assertEqual(results, (['9156b83e-f684-4ec3-8f94-7e41902f27aa'],
                                    []))
-
+        self.assertEqual(exist1.send_status, '201')
         self.mox.VerifyAll()
 
     def test_mark_exists_as_sent_unverified_and_return_exist_not_pending(self):
@@ -272,6 +279,6 @@ class InstanceExistsTestCase(unittest.TestCase):
 
         self.assertEqual(results, ([],
                                    ["9156b83e-f684-4ec3-8f94-7e41902f27aa"]))
-
+        self.assertEqual(exist1.send_status, '201')
         self.mox.VerifyAll()
 
