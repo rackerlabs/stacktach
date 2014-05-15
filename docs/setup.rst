@@ -54,7 +54,7 @@ But that's not much fun. A deployment entry would look like this: ::
              "topics": {
                  "nova": [
                      {"queue": "notifications.info", "routing_key": "notifications.info"},
-                     {"queue": "notifications.error", "routing_key": "notifications.error"},
+                     {"queue": "notifications.error", "routing_key": "notifications.error"}
                  ]
              }
          }
