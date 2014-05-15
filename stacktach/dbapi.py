@@ -5,9 +5,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-# 
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -239,8 +239,8 @@ def _get_exist_stats(request, service):
     stats = values.annotate(event_count=Count('send_status'))
     return list(stats)
 
-@api_call
-def exists_send_status(request, message_id):
+def _undecorated_exists_send_status(request, message_id):
+    # No decorator for testing purposes.
     if request.method not in ['PUT', 'POST']:
         raise BadRequestException(message="Invalid method")
 
@@ -270,6 +270,11 @@ def exists_send_status(request, message_id):
         else:
             msg = "'send_status' missing from request body"
             raise BadRequestException(message=msg)
+
+
+@api_call
+def exists_send_status(request, message_id):
+    _undecorated_exists_send_status(request, message_id)
 
 
 def _find_exists_with_message_id(msg_id, exists_model, service):
@@ -545,14 +550,14 @@ def _update_tenant_info_cache(tenant_info):
 def _batch_update_tenant_info(info_list):
     tenant_info = dict((str(info['tenant']), info) for info in info_list)
     tenant_ids = set(tenant_info)
-    old_tenants = set(t['tenant'] for t in 
+    old_tenants = set(t['tenant'] for t in
                       models.TenantInfo.objects
                                .filter(tenant__in=list(tenant_ids))
                                .values('tenant'))
     new_tenants = []
     now = datetime.utcnow()
     for tenant in (tenant_ids - old_tenants):
-        new_tenants.append(models.TenantInfo(tenant=tenant, 
+        new_tenants.append(models.TenantInfo(tenant=tenant,
                                              name=tenant_info[tenant]['name'],
                                              last_updated=now))
     if new_tenants:
@@ -560,7 +565,8 @@ def _batch_update_tenant_info(info_list):
     tenants = models.TenantInfo.objects.filter(tenant__in=list(tenant_ids))
     tenants.update(last_updated=now)
 
-    types = dict(((tt.name,tt.value),tt) for tt in models.TenantType.objects.all())
+    types = dict(((tt.name, tt.value), tt)
+                        for tt in models.TenantType.objects.all())
     TypeXref = models.TenantInfo.types.through
 
     changed_tenant_dbids = []
@@ -612,5 +618,5 @@ def update_tenant_info(request, tenant_id):
 
     body = json.loads(request.body)
     if body['tenant'] != tenant_id:
-        raise BadRequestException(message="Invalid tenant: %s != %s" % (body['tenant'], tenant_id)) 
+        raise BadRequestException(message="Invalid tenant: %s != %s" % (body['tenant'], tenant_id))
     _update_tenant_info_cache(body)

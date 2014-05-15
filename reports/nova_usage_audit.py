@@ -25,6 +25,7 @@ sys.path.append(os.environ.get('STACKTACH_INSTALL_DIR', '/stacktach'))
 
 import usage_audit
 
+from stacktach.models import InstanceUsage
 from stacktach import datetime_to_decimal as dt
 from stacktach import models
 from stacktach.reconciler import Reconciler
@@ -92,6 +93,14 @@ def _get_exists(beginning, ending):
     return models.InstanceExists.objects.filter(**filters)
 
 
+def cell_and_compute(instance, launched_at):
+    usage = InstanceUsage.find(instance, launched_at)[0]
+    deployment = usage.latest_deployment_for_request_id()
+    cell = (deployment and deployment.name) or '-'
+    compute = usage.host() or '-'
+    return cell, compute
+
+
 def _audit_launches_to_exists(launches, exists, beginning):
     fails = []
     for (instance, launches) in launches.items():
@@ -110,16 +119,22 @@ def _audit_launches_to_exists(launches, exists, beginning):
                     if reconciler:
                         args = (expected['id'], beginning)
                         rec = reconciler.missing_exists_for_instance(*args)
+                    launched_at = dt.dt_from_decimal(expected['launched_at'])
                     msg = "Couldn't find exists for launch (%s, %s)"
-                    msg = msg % (instance, expected['launched_at'])
-                    fails.append(['Launch', expected['id'], msg, 'Y' if rec else 'N'])
+                    msg = msg % (instance, launched_at)
+                    cell, compute = cell_and_compute(instance, launched_at)
+                    fails.append(['Launch', expected['id'], msg,
+                                  'Y' if rec else 'N', cell, compute])
         else:
             rec = False
             if reconciler:
                 args = (launches[0]['id'], beginning)
                 rec = reconciler.missing_exists_for_instance(*args)
             msg = "No exists for instance (%s)" % instance
-            fails.append(['Launch', '-', msg, 'Y' if rec else 'N'])
+            launched_at = dt.dt_from_decimal(launches[0]['launched_at'])
+            cell, compute = cell_and_compute(instance, launched_at)
+            fails.append(['-', msg, 'Y' if rec else 'N',
+                          cell, compute])
     return fails
 
 
@@ -229,7 +244,7 @@ def store_results(start, end, summary, details):
         'created': dt.dt_to_decimal(datetime.datetime.utcnow()),
         'period_start': start,
         'period_end': end,
-        'version': 6,
+        'version': 7,
         'name': 'nova usage audit'
     }
 
@@ -238,10 +253,15 @@ def store_results(start, end, summary, details):
 
 
 def make_json_report(summary, details):
-    report = [{'summary': summary},
-              ['Object', 'ID', 'Error Description', 'Reconciled?']]
-    report.extend(details['exist_fails'])
-    report.extend(details['launch_fails'])
+    report = {
+        'summary': summary,
+        'exist_fail_headers': ['Exists Row ID', 'Error Description', 'Cell',
+                               'Compute'],
+        'exist_fails': details['exist_fails'],
+        'launch_fail_headers': ['Launch Row ID', 'Error Description',
+                                'Reconciled?', 'Cell', 'Compute'],
+        'launch_fails': details['launch_fails']
+    }
     return json.dumps(report)
 
 

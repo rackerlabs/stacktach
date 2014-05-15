@@ -5,9 +5,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-# 
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -537,13 +537,13 @@ class GlanceVerifierTestCase(StacktachBaseTestCase):
         exist4.save()
         exist5.save()
         self.pool.apply_async(glance_verifier._verify,
-                              args=([exist4],), callback=None)
+                              args=([exist4],), callback=None).InAnyOrder()
         self.pool.apply_async(glance_verifier._verify, args=([exist5],),
-                              callback=None)
+                              callback=None).InAnyOrder()
         self.pool.apply_async(glance_verifier._verify,
-                              args=([exist1, exist2],), callback=None)
+                              args=([exist1, exist2],), callback=None).InAnyOrder()
         self.pool.apply_async(glance_verifier._verify, args=([exist3],),
-                              callback=None)
+                              callback=None).InAnyOrder()
         self.mox.ReplayAll()
 
         self.glance_verifier.verify_for_range(when_max)
@@ -579,13 +579,12 @@ class GlanceVerifierTestCase(StacktachBaseTestCase):
         exist1.save()
         exist2.save()
         exist3.save()
-        self.pool.apply_async(glance_verifier._verify, args=([exist1, exist2],),
-                              callback=callback)
         self.pool.apply_async(glance_verifier._verify, args=([exist3],),
-                              callback=callback)
+                              callback=callback).InAnyOrder()
+        self.pool.apply_async(glance_verifier._verify, args=([exist1, exist2],),
+                              callback=callback).InAnyOrder()
         self.mox.ReplayAll()
-        self.glance_verifier.verify_for_range(
-            when_max, callback=callback)
+        self.glance_verifier.verify_for_range(when_max, callback=callback)
         self.assertEqual(exist1.status, 'verifying')
         self.assertEqual(exist2.status, 'verifying')
         self.assertEqual(exist3.status, 'verifying')

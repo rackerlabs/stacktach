@@ -178,10 +178,19 @@ class InstanceUsage(models.Model):
 
     def deployment(self):
         raws = RawData.objects.filter(request_id=self.request_id)
-        if raws.count() == 0:
-            return False
-        raw = raws[0]
-        return raw.deployment
+        return raws and raws[0].deployment
+
+    def latest_deployment_for_request_id(self):
+        raw = self.latest_raw_for_request_id()
+        return raw and raw.deployment
+
+    def latest_raw_for_request_id(self):
+        return self.request_id and RawData.objects.filter(
+            request_id=self.request_id).order_by('-id')[0]
+
+    def host(self):
+        raw = self.latest_raw_for_request_id()
+        return raw and raw.host
 
     @staticmethod
     def find(instance, launched_at):

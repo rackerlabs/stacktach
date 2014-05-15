@@ -59,12 +59,6 @@ stacky_urls = (
     url(r'^stacky/search/$', 'stacktach.stacky_server.search'),
     url(r'^stacky/kpi/$', 'stacktach.stacky_server.do_kpi'),
     url(r'^stacky/kpi/(?P<tenant_id>\w+)/$', 'stacktach.stacky_server.do_kpi'),
-    url(r'^stacky/usage/launches/$',
-        'stacktach.stacky_server.do_list_usage_launches'),
-    url(r'^stacky/usage/deletes/$',
-        'stacktach.stacky_server.do_list_usage_deletes'),
-    url(r'^stacky/usage/exists/$',
-        'stacktach.stacky_server.do_list_usage_exists'),
 )
 
 dbapi_urls = (
