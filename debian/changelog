@@ -1,11 +1,10 @@
-stacktach (1.0-1) precise-havana; urgency=low
+stacktach (1.0) precise-havana; urgency=low
 
-  * Debianisaton updated to let stacktach run on Ubuntu 14.04 out of the box.  More precisely: package depends added, pip install $necessary_modules_lsit, etc. 
-  * Database / worker configuration still needed to be done manually (or by separate meta-package). 
+  * Debianisaton updated to let stacktach run on Ubuntu 14.04 out of the box (only minor configuration needed).
 
  -- Danil Akhmetov <dinobot@yandex-team.ru>  Wed, 15 Apr 2014 16:33:53 +0400
 
-stacktach (1.0) precise-havana; urgency=low
+stacktach (0.1) precise-havana; urgency=low
 
   * Initial
 
