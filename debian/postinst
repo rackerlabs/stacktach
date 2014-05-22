@@ -24,9 +24,7 @@ case "$1" in
 	    adduser --system stacktach --ingroup stacktach ||:
 	    mkdir -p /var/log/stacktach
 	    chown stacktach. /var/log/stacktach
-	    pip install amqp anyjson coverage Django kombu librabbitmq mox MySQL-python nose nose-exclude Pympler South
-	    pip install -U South
-		echo 'Almost done. At least mysql database setup and worker config needed to go.'
+		echo 'Almost done. Just mysql database and worker setup needed to go.'
 		echo 'Official how-to:'
 		echo 'https://media.readthedocs.org/pdf/stacktach/latest/stacktach.pdf'
     ;;

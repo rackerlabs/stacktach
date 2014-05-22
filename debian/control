@@ -12,6 +12,7 @@ Depends: ${python:Depends},
 	mysql-server, libmysqlclient-dev, nginx,
 	python-mysqldb,
 	python-django (>= 1.4.2), python-django-south, python-kombu,
-	python-librabbitmq,
-	python-pip
+	python-amqp,python-anyjson,python-coverage,python-kombu,python-librabbitmq,
+	python-mox,python-django-nose,python-nose,python-nose-exclude,python-django-south,python-mysqldb,
+	python-pympler
 Description: OpenStack Tachometer
