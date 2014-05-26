@@ -1,3 +1,7 @@
+stacktach (1.0-1) precise-havana; urgency=low
+
+  * Added missed dependencies
+
 stacktach (1.0) precise-havana; urgency=low
 
   * Debianisaton updated to let stacktach run on Ubuntu 14.04 out of the box (only minor configuration needed).
