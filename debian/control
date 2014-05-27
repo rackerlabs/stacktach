@@ -1,7 +1,7 @@
 Source: stacktach
 Section: admin
 Priority: extra
-Maintainer: Vladimir Eremin <yottatsa@yandex-team.ru>
+Maintainer: Vladimir Eremin <yottatsa@yandex-team.ru>, Danil Akhmetov <dinobot@yandex-team.ru>
 Build-Depends: debhelper (>= 7.0.0), cdbs
 Standards-Version: 3.9.2
 
@@ -9,6 +9,9 @@ Package: stacktach
 Architecture: all
 XB-Python-Version: ${python:Versions}
 Depends: ${python:Depends},
+	mysql-server, libmysqlclient-dev, nginx,
 	python-mysqldb,
-	python-django (>= 1.4.2), python-django-south, python-kombu
+	python-django (>= 1.4.2), python-django-south (>=0.8),
+	python-kombu,python-amqp,python-anyjson,python-coverage,python-kombu,python-librabbitmq,
+	python-mox,python-django-nose,python-nose,python-nose-exclude,python-django-south,python-mysqldb,python-pympler
 Description: OpenStack Tachometer
