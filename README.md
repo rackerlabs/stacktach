@@ -1,15 +1,13 @@
-[![Build Status](https://travis-ci.org/rackerlabs/stacktach.png?branch=master)](https://travis-ci.org/rackerlabs/stacktach)
+# StackTach.v2
 
-# StackTach
+This is the old repo for StackTach.v2
 
-StackTach is a debugging / monitoring utility for OpenStack ([Open]StackTach[ometer]). StackTach can work with multiple datacenters including multi-cell deployments.
+The project has since moved to [StackForge](http://git.openstack.org/cgit/stackforge/stacktach/)
 
-Watch the video here: http://www.youtube.com/watch?v=pZgwDHZ3wm0
+There is also a [GitHub read-only mirror](https://github.com/stackforge/stacktach)
 
-## Overview
-OpenStack has the ability to publish notifications to a RabbitMQ exchange as they occur. So, rather than pouring through reams of logs across multiple servers, you can now watch requests travel through the system from a single location.
+[git://](git://git.openstack.org/stackforge/stacktach)
+[https://](https://git.openstack.org/stackforge/stacktach)
 
-A detailed description of the notifications published by OpenStack [is available here](http://wiki.openstack.org/SystemUsageData)
+StackTach.v3 development is currently active and also on [StackForge](https://github.com/stackforge?query=stacktach)
 
-## Documentation
-http://stacktach.readthedocs.org/
