@@ -1,5 +1,5 @@
-stacktach (1.0) trusty-icehouse; urgency=low
+stacktach (2.0~alpha1) trusty-icehouse; urgency=low
 
   * Initial
 
- -- Vladimir Eremin <yottatsa@yandex-team.ru>  Wed, 19 Mar 2014 15:03:53 +0400
+ -- Vladimir Eremin <yottatsa@yandex-team.ru>  Mon, 06 Oct 2014 17:51:57 +0400
