@@ -12,13 +12,13 @@ STACKTACH_DB_USERNAME = os.environ.get('STACKTACH_DB_USERNAME', "")
 STACKTACH_DB_PASSWORD = os.environ.get('STACKTACH_DB_PASSWORD', "")
 STACKTACH_DB_PORT = os.environ.get('STACKTACH_DB_PORT', "")
 
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
+
 try:
     from local_settings import *
 except ImportError:
     pass
-
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
