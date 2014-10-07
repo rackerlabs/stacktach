@@ -1,5 +1,7 @@
 .idea/
 .venv/
+build/
+*.egg-info/
 
 *.pyc
 local_settings.py
