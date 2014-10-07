@@ -22,7 +22,6 @@ Depends: ${python:Depends},
 	python-django-nose,
 	python-nose,
 	python-nose-exclude,
-	python-pympler,
+	python-pympler
 Suggests: nginx, uwsgi, uwsgi-plugin-python
-
 Description: OpenStack Tachometer
