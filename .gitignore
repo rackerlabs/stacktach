@@ -2,6 +2,7 @@
 .venv/
 build/
 *.egg-info/
+stacktach.sqlite3
 
 *.pyc
 local_settings.py

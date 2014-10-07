@@ -1,27 +1,22 @@
 # Django settings for StackTach project.
 import os
+STACKTACH_INSTALL_DIR = os.environ.get('STACKTACH_INSTALL_DIR',
+                                       os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+STACKTACH_DB_NAME = os.environ.get('STACKTACH_DB_NAME',
+                                   os.path.join(STACKTACH_INSTALL_DIR, 'stacktach.sqlite3'))
+STACKTACH_DB_ENGINE = os.environ.get('STACKTACH_DB_ENGINE',
+                                     'django.db.backends.sqlite3')
+STACKTACH_DB_HOST = os.environ.get('STACKTACH_DB_HOST', "")
+STACKTACH_DB_USERNAME = os.environ.get('STACKTACH_DB_USERNAME', "")
+STACKTACH_DB_PASSWORD = os.environ.get('STACKTACH_DB_PASSWORD', "")
+STACKTACH_DB_PORT = os.environ.get('STACKTACH_DB_PORT', "")
 
 try:
     from local_settings import *
-
-    db_engine = STACKTACH_DB_ENGINE
-    db_name = STACKTACH_DB_NAME
-    db_host = STACKTACH_DB_HOST
-    db_username = STACKTACH_DB_USERNAME
-    db_password = STACKTACH_DB_PASSWORD
-    db_port = STACKTACH_DB_PORT
-    install_dir = os.path.expanduser(STACKTACH_INSTALL_DIR)
 except ImportError:
-    db_engine = os.environ.get('STACKTACH_DB_ENGINE',
-                               'django.db.backends.mysql')
-    db_name = os.environ['STACKTACH_DB_NAME']
-    db_host = os.environ.get('STACKTACH_DB_HOST', "")
-    db_username = os.environ['STACKTACH_DB_USERNAME']
-    db_password = os.environ['STACKTACH_DB_PASSWORD']
-    db_port = os.environ.get('STACKTACH_DB_PORT', "")
-    install_dir = os.environ['STACKTACH_INSTALL_DIR']
+    pass
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -32,12 +27,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': db_engine,
-        'NAME': db_name,
-        'USER': db_username,
-        'PASSWORD': db_password,
-        'HOST': db_host,    # Set to empty string for localhost.
-        'PORT': db_port,    # Set to empty string for default.
+        'ENGINE': STACKTACH_DB_ENGINE,
+        'NAME': STACKTACH_DB_NAME,
+        'USER': STACKTACH_DB_USERNAME,
+        'PASSWORD': STACKTACH_DB_PASSWORD,
+        'HOST': STACKTACH_DB_HOST,    # Set to empty string for localhost.
+        'PORT': STACKTACH_DB_PORT,    # Set to empty string for default.
     }
 }
 
@@ -93,7 +88,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    [install_dir + "static",]
+    [os.path.join(STACKTACH_INSTALL_DIR, "static"),]
 )
 
 # List of finder classes that know how to find static files in
@@ -127,7 +122,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    install_dir + "templates"
+    os.path.join(STACKTACH_INSTALL_DIR, "templates")
 )
 INSTALLED_APPS = (
     'django.contrib.auth',
