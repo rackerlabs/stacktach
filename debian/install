@@ -7,4 +7,4 @@ worker usr/share/stacktach/
 etc/*.py etc/stacktach/
 etc/*.json etc/stacktach/
 etc/nginx/stacktach etc/nginx/sites-available/
-etc/init/stacktach.conf etc/init/
+etc/uwsgi/stacktach.ini /etc/uwsgi/apps-available/
