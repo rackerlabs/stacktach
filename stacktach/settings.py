@@ -1,7 +1,8 @@
 # Django settings for StackTach project.
 import os
 STACKTACH_INSTALL_DIR = os.environ.get('STACKTACH_INSTALL_DIR',
-                                       os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+                                       os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+STACKTACH_DEPLOYMENTS_FILE = os.path.join(STACKTACH_INSTALL_DIR, 'etc')
 STACKTACH_DB_NAME = os.environ.get('STACKTACH_DB_NAME',
                                    os.path.join(STACKTACH_INSTALL_DIR, 'stacktach.sqlite3'))
 STACKTACH_DB_ENGINE = os.environ.get('STACKTACH_DB_ENGINE',
