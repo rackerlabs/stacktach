@@ -2,7 +2,7 @@ Source: stacktach
 Section: admin
 Priority: extra
 Maintainer: Vladimir Eremin <yottatsa@yandex-team.ru>
-Build-Depends: debhelper (>= 8.0.0), python-all-dev, python-setuptools
+Build-Depends: debhelper (>= 8.0.0), python-all-dev, python-setuptools, python-pip
 Standards-Version: 3.9.2
 
 Package: stacktach
